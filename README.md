@@ -1,42 +1,51 @@
 # Vue.js Todo Client
 
-A modern, responsive Vue.js 3 frontend for the Laravel Todo API system with real-time statistics, role-based access control, and seamless state management.
+A modern, responsive Vue.js 3 frontend for the Laravel Todo API system with real-time statistics, role-based access control, comprehensive filtering, and modular architecture.
 
 ## 🏗️ **Project Structure**
 
 This is the **frontend client** for the complete full-stack todo application:
 - **Backend API**: `../laravel-api/` - Laravel API with authentication and todo management
-- **Frontend Client** (this repo): Vue.js 3 SPA with Pinia state management
+- **Frontend Client** (this repo): Vue.js 3 SPA with modular component architecture
 
 ## ✨ **Features**
 
 ### 🔐 **Authentication & Authorization**
-- **User Registration & Login** with token-based authentication
-- **Role-based UI** (Admin vs Regular User views)
+- **Laravel Sanctum** token-based authentication
+- **Role-based access control** (Admin vs Regular User)
 - **Persistent sessions** with automatic token refresh
 - **Protected routes** with navigation guards
+- **CSRF protection** for enhanced security
 
 ### ✅ **Todo Management**
 - **Real-time CRUD operations** (Create, Read, Update, Delete)
 - **Instant status updates** with optimistic UI updates
 - **Status badges** (Pending, Completed, Overdue)
-- **Due date management** with overdue detection
-- **Bulk operations** (Mark all complete, Delete completed)
+- **Due date management** with automatic overdue detection
+- **User ownership** - Users see only their todos, Admins see all
+
+### 🔍 **Advanced Filtering System**
+- **Status Filtering**: All Status, Completed, Incomplete, Overdue
+- **User ID Filtering**: Admin can filter by specific user ID
+- **Username Search**: Real-time search by username or email
+- **Hybrid Filtering**: Both client-side and server-side filtering
+- **Real-time Filter Updates**: Instant results without page refresh
 
 ### 📊 **Smart Statistics**
-- **Real-time stats** that update without API calls
+- **Real-time stats** calculated on the frontend for responsiveness
 - **Role-based statistics**:
   - **Users**: Personal todo statistics
   - **Admins**: System-wide statistics for all users  
 - **Visual progress indicators** with animated progress bars
-- **Background sync** with backend every 5 minutes
-- **Manual sync** capability with loading states
+- **Auto-updating stats** that respond to any todo changes
+- **Background sync** with backend periodically
 
 ### 🎨 **User Experience**
+- **Modular component architecture** for maintainability
 - **Responsive design** with Tailwind CSS
 - **Smooth animations** and transitions
 - **Loading states** and error handling
-- **Confirmation dialogs** for destructive actions
+- **Empty states** with helpful messaging
 - **Real-time visual feedback** for all operations
 
 ## 📋 Requirements
@@ -60,29 +69,43 @@ npm install
 
 The application is configured to connect to your Laravel API at `http://localhost:8000/api`. If your backend runs on a different URL, update the `API_BASE_URL` in `src/config/api.ts`.
 
-## 📁 **Project Structure**
+### 3. Development
+
+```bash
+# Start development server
+npm run dev
+```
+
+## 🏗️ **Modular Architecture**
+
+The application follows a modular component architecture for better maintainability:
 
 ```
 src/
-├── 📁 components/          # Reusable Vue components
-│   ├── TodoStats.vue       # Real-time statistics component
-│   ├── StatsDebugger.vue   # Debug component for development
-│   └── ...
+├── 📁 components/          # Modular Vue components
+│   ├── TodoHeader.vue      # Header with user info and actions
+│   ├── TodoFilters.vue     # Advanced filtering component
+│   ├── TodoStats.vue       # Real-time statistics display
+│   ├── TodoItem.vue        # Individual todo item component
+│   ├── TodoLoadingState.vue # Loading state component
+│   ├── TodoEmptyState.vue  # Empty state with helpful messaging
+│   └── HelloWorld.vue      # Example component
 ├── 📁 composables/         # Vue 3 composables (hooks)
 │   ├── useTodoStats.ts     # Smart statistics management
-│   ├── useWebSocket.ts     # WebSocket integration (future)
+│   ├── useWebSocket.ts     # Real-time WebSocket integration
 │   └── ...
 ├── 📁 services/            # API service layer
 │   ├── authService.ts      # Authentication API calls
-│   ├── todoService.ts      # Todo management API calls
-│   └── api.ts              # Axios configuration
+│   ├── todoService.ts      # Todo management with filtering
+│   └── api.ts              # Axios configuration with Sanctum
 ├── 📁 stores/              # Pinia state management
 │   ├── authStore.ts        # Authentication state
-│   ├── todoStore.ts        # Todo management state
+│   ├── todoStore.ts        # Todo management with filtering
 │   └── ...
 ├── 📁 views/               # Page components
-│   ├── TodoDashboard.vue   # Main dashboard
+│   ├── TodoList.vue        # Main todo list (refactored modular)
 │   ├── LoginView.vue       # Login page
+│   ├── RegisterView.vue    # Registration page
 │   └── ...
 ├── 📁 router/              # Vue Router configuration
 ├── 📁 config/              # App configuration
@@ -91,34 +114,77 @@ src/
 
 ## 🔧 **Key Components**
 
-### **TodoStats Component**
-Real-time statistics display with:
-- Automatic updates when todos change
-- Role-based data (personal vs system-wide)
-- Visual progress indicators
-- Manual sync capability
+### **Modular Component Architecture**
 
-### **TodoDashboard View**
-Main application interface featuring:
-- Interactive todo list with status badges
-- Real-time statistics panel
-- Quick actions for bulk operations
-- Responsive grid layout
+#### **TodoFilters.vue**
+Advanced filtering component with:
+- **Status Dropdown**: Filter by All Status, Completed, Incomplete, Overdue
+- **User ID Input**: Admin-only feature to filter by specific user ID
+- **Username Search**: Real-time search by username or email
+- **Responsive Layout**: Adapts to mobile and desktop screens
+
+#### **TodoStats.vue**
+Real-time statistics display with:
+- **Frontend Calculation**: Instant updates without API calls
+- **Role-based Data**: Personal stats for users, system-wide for admins
+- **Visual Progress**: Animated progress bars and counters
+- **Auto-refresh**: Updates automatically when todos change
+
+#### **TodoItem.vue**
+Individual todo component featuring:
+- **Quick Toggle**: One-click status change
+- **Inline Editing**: Edit directly in the list
+- **Status Badges**: Visual indicators for pending/completed/overdue
+- **Due Date Display**: Clear date formatting with overdue warnings
+
+#### **TodoList.vue (Refactored)**
+Main container component (reduced from 380 to ~100 lines):
+- **Component Composition**: Uses all modular components
+- **Filtered Data**: Displays filtered todos from store
+- **Event Handling**: Manages filter updates and user interactions
+- **Loading States**: Proper loading and empty states
 
 ### **Smart State Management**
-- **Optimistic updates**: UI updates immediately, syncs with backend
-- **Background sync**: Periodic synchronization with server
-- **Error handling**: Graceful handling of network issues
-- **Role awareness**: Different behavior for admin vs regular users
+- **Hybrid Filtering**: Both client-side (instant) and server-side filtering
+- **Optimistic Updates**: UI updates immediately, syncs with backend
+- **Role Awareness**: Different behavior for admin vs regular users
+- **Error Handling**: Graceful handling of network issues
+
+## 🔍 **Filtering System**
+
+### **Status Filtering**
+```typescript
+// Filter by completion status
+filters: {
+  status: 'completed' | 'incomplete' | 'overdue' | undefined
+}
+```
+
+### **User Filtering (Admin Only)**
+```typescript
+// Filter by specific user ID
+filters: {
+  user_id: number | undefined
+}
+```
+
+### **Username Search**
+```typescript
+// Search by username or email
+filters: {
+  username: string | undefined
+}
+```
 
 ## 🎯 **Usage Examples**
 
-### **User Registration**
+### **Authentication**
 ```typescript
 import { useAuthStore } from '@/stores/authStore'
 
 const authStore = useAuthStore()
 
+// Register new user
 await authStore.register({
   name: 'John Doe',
   email: 'john@example.com',
@@ -126,18 +192,57 @@ await authStore.register({
   password_confirmation: 'password123',
   role: 'user'
 })
+
+// Login user
+await authStore.login({
+  email: 'john@example.com',
+  password: 'password123'
+})
 ```
 
-### **Creating Todos**
+### **Todo Management**
 ```typescript
 import { useTodoStore } from '@/stores/todoStore'
 
 const todoStore = useTodoStore()
 
+// Create new todo
 await todoStore.createTodo({
   nama: 'Complete project',
   deskripsi: 'Finish the todo application',
   due_date: '2025-08-01'
+})
+
+// Toggle todo status
+await todoStore.toggleTodo(todoId)
+
+// Update todo
+await todoStore.updateTodo(todoId, {
+  nama: 'Updated todo name',
+  deskripsi: 'Updated description'
+})
+```
+
+### **Filtering Todos**
+```typescript
+import { useTodoStore } from '@/stores/todoStore'
+
+const todoStore = useTodoStore()
+
+// Get filtered todos (computed getter)
+const filteredTodos = todoStore.filteredTodos
+
+// Update filters
+todoStore.updateFilters({
+  status: 'completed',
+  user_id: 5,
+  username: 'john'
+})
+
+// Fetch todos with server-side filtering
+await todoStore.fetchTodos({
+  status: 'incomplete',
+  username: 'john'
 })
 ```
 
@@ -156,55 +261,66 @@ const {
 
 ## 🔄 **State Management Flow**
 
+### **Todo Operations**
 1. **User Action** → Component calls store method
 2. **Optimistic Update** → UI updates immediately  
 3. **API Call** → Request sent to Laravel backend
 4. **State Sync** → Store updates with server response
 5. **Statistics Update** → Stats automatically recalculated
 
+### **Filtering Flow**
+1. **Filter Change** → TodoFilters.vue emits update:filters
+2. **Store Update** → TodoList.vue calls todoStore.updateFilters()
+3. **Client Filtering** → filteredTodos getter filters todos array
+4. **Server Filtering** → Optional API call with filter parameters
+5. **UI Update** → Filtered results displayed instantly
+
 This ensures the UI feels instant while maintaining data consistency.
 
 ## 🧪 **Development Features**
 
-### **Debug Component**
-Use `StatsDebugger.vue` to verify statistics accuracy:
-
-```vue
-<template>
-  <div>
-    <!-- Shows comparison between list count and stats -->
-    <StatsDebugger />
-    <TodoStats />
-  </div>
-</template>
-```
+### **TypeScript Support**
+Full TypeScript integration with type checking and IntelliSense for:
+- **Component Props**: Strongly typed component interfaces
+- **Store State**: Type-safe Pinia stores
+- **API Responses**: Comprehensive type definitions
+- **Filter Interfaces**: TodoFilters interface for filtering system
 
 ### **Hot Module Replacement**
 Development server supports HMR for instant updates during development.
 
-### **TypeScript Support**
-Full TypeScript integration with type checking and IntelliSense.
+### **Production Ready**
+- All debugging features removed for production deployment
+- Clean, maintainable code with modular architecture
+- Optimized build configuration with Vite
 
 ## 🌐 **API Integration**
 
 The frontend integrates with these Laravel API endpoints:
 
-### **Authentication**
-- `POST /api/register` - User registration
-- `POST /api/login` - User login  
-- `POST /api/logout` - User logout
-- `GET /api/user` - Get current user
+### **Authentication (Laravel Sanctum)**
+- `POST /api/register` - User registration with role assignment
+- `POST /api/login` - User login with token generation
+- `POST /api/logout` - User logout with token revocation
+- `GET /api/user` - Get current authenticated user
 
 ### **Todo Management**
-- `GET /api/todos` - List todos (filtered by role)
+- `GET /api/todos` - List todos with filtering support
+  - Query params: `status`, `user_id`, `username`
 - `POST /api/todos` - Create new todo
 - `PUT /api/todos/{id}` - Update todo
 - `DELETE /api/todos/{id}` - Delete todo
-- `PATCH /api/todos/{id}/toggle` - Toggle completion
+- `PATCH /api/todos/{id}/toggle` - Toggle completion status
 
 ### **Statistics**
 - `GET /api/my-todo-stats` - Personal statistics (users)
-- `GET /api/admin/todo-stats` - System statistics (admins)
+- `GET /api/admin/todo-stats` - System-wide statistics (admins)
+
+### **Enhanced Security**
+- **CSRF Protection**: Automatic CSRF token handling
+- **Bearer Token**: Authorization header for all requests
+- **Request Interceptors**: Automatic token attachment
+- **Response Interceptors**: Error handling and token refresh
 
 ## 🔧 **Configuration**
 
@@ -251,15 +367,82 @@ Create appropriate `.env.production` file:
 ```env
 VITE_API_BASE_URL=https://api.yourdomain.com/api
 VITE_APP_NAME="Todo Application"
+## 🔧 **Configuration**
+
+### **Environment Variables**
+Create a `.env` file in the project root:
+```env
+VITE_API_BASE_URL=http://localhost:8000/api
+```
+
+### **API Configuration** (`src/config/api.ts`)
+```typescript
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  },
+  withCredentials: true, // For CSRF cookie
+})
+```
+
+### **Router Configuration** (`src/router/index.ts`)
+- **Protected routes** with authentication guards
+- **Role-based route access** (admin vs user)
+- **Automatic redirects** for unauthenticated users
+- **Route meta** for role requirements
+
+## 🚀 **Deployment**
+
+### **Development**
+```bash
+npm run dev
+```
+
+### **Production Build**
+```bash
+npm run build
+```
+
+### **Preview Production Build**
+```bash
+npm run preview
 ```
 
 ## 🛡️ **Security Features**
 
-- **Token-based authentication** with automatic refresh
-- **Protected API requests** with authorization headers
-- **Role-based access control** in UI
-- **XSS protection** through Vue.js templating
-- **CSRF protection** via Laravel Sanctum
+- **Laravel Sanctum** token-based authentication with CSRF protection
+- **Protected API requests** with automatic authorization headers
+- **Role-based access control** throughout the UI
+- **XSS protection** through Vue.js templating and sanitization
+- **Input validation** on both frontend and backend
+- **Secure token storage** with automatic cleanup on logout
+
+## 📊 **Performance Features**
+
+- **Frontend-calculated statistics** for instant responsiveness
+- **Optimistic UI updates** for better user experience
+- **Hybrid filtering** (client-side + server-side)
+- **Lazy loading** and code splitting with Vite
+- **Tree shaking** for optimized bundle size
+- **Hot Module Replacement** for fast development
+
+## 🔄 **Real-time Features**
+
+### **WebSocket Integration** (`useWebSocket.ts`)
+Ready for real-time collaboration with:
+- **Auto-reconnection** with exponential backoff
+- **Real-time todo updates** across multiple users
+- **Live statistics** updates
+- **Connection status** indicators
+
+### **Reactive Data Flow**
+- **Pinia reactivity** for automatic UI updates
+- **Computed properties** for derived state
+- **Watchers** for side effects and API calls
 
 ## 🤝 **Contributing**
 
@@ -689,43 +872,75 @@ localStorage.clear()
 ```bash
 # Ensure @tailwindcss/vite is installed
 npm list @tailwindcss/vite
-# Should show version number
-```
+## 🤝 **Contributing**
 
-### Debug Tips
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/new-feature`
+3. Make your changes following the modular architecture
+4. Add TypeScript types if applicable
+5. Test your changes with both user and admin roles
+6. Commit your changes: `git commit -m 'Add new feature'`
+7. Push to the branch: `git push origin feature/new-feature`
+8. Submit a pull request
 
-**Store Debugging:**
-```vue
-<script setup>
-import { useAuthStore } from '@/stores/authStore'
+## 📄 **License**
 
-const authStore = useAuthStore()
+This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
-// Debug current state
-console.log('Auth state:', {
-  user: authStore.user,
-  token: authStore.token,
-  isAuthenticated: authStore.isAuthenticated
-})
-</script>
-```
+## 🙏 **Acknowledgments**
 
-**API Debugging:**
-```javascript
-// Check network tab in browser DevTools
-// Look for API calls and their responses
-// Check request headers include Authorization: Bearer token
-```
+- **Vue.js 3** - The Progressive JavaScript Framework with Composition API
+- **Pinia** - Intuitive state management for Vue
+- **Tailwind CSS** - Utility-first CSS framework
+- **Laravel Sanctum** - Simple SPA authentication
+- **TypeScript** - Type safety and developer experience
+- **Vite** - Fast build tool and development server
 
-## 📚 Learning Resources
+## 📞 **Support**
 
-- [Vue.js 3 Documentation](https://vuejs.org/)
-- [Pinia State Management](https://pinia.vuejs.org/)
-- [Vue Router](https://router.vuejs.org/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Vite](https://vitejs.dev/)
+If you encounter any issues:
+
+1. **Development Issues:**
+   - Check the browser console for errors
+   - Verify the Laravel API is running on `http://localhost:8000`
+   - Ensure CORS is properly configured in Laravel
+   - Check network requests in browser dev tools
+
+2. **Authentication Issues:**
+   - Verify Sanctum configuration in Laravel
+   - Check token storage in browser localStorage
+   - Ensure API routes are properly protected
+
+3. **Filtering Issues:**
+   - Check browser console for filter-related errors
+   - Verify filter parameters in network requests
+   - Test both client-side and server-side filtering
+
+For API-related issues, refer to the Laravel API documentation.
+
+## 📚 **Learning Resources**
+
+- [Vue.js 3 Documentation](https://vuejs.org/) - Official Vue.js guide
+- [Pinia State Management](https://pinia.vuejs.org/) - Modern Vue state management
+- [Vue Router](https://router.vuejs.org/) - Official router for Vue.js
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+- [TypeScript](https://www.typescriptlang.org/) - JavaScript with type safety
+- [Laravel Sanctum](https://laravel.com/docs/sanctum) - SPA authentication
 
 ---
+
+## 🎯 **Project Status**
+
+✅ **Complete Features:**
+- ✅ Authentication with Laravel Sanctum
+- ✅ Role-based access control (Admin/User)
+- ✅ CRUD operations for todos
+- ✅ Advanced filtering system (status, user_id, username)
+- ✅ Real-time frontend statistics
+- ✅ Modular component architecture
+- ✅ TypeScript integration
+- ✅ Production-ready codebase
+
+This project demonstrates a modern Vue.js 3 SPA with clean architecture, comprehensive filtering, and real-time features, perfect for learning advanced frontend development patterns.
 
 **Happy coding! 🎉**
