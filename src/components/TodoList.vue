@@ -12,7 +12,9 @@
     <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
       <!-- Filters Component -->
       <TodoFiltersComponent 
-        v-model:filters="filters"
+        :filters="filters"
+        :is-admin="authStore.isAdmin"
+        @update:filters="handleFiltersUpdate"
         @refresh="refreshData"
       />
 
@@ -26,7 +28,7 @@
 
       <!-- Empty State -->
       <TodoEmptyState 
-        v-else-if="todoStore.todos.length === 0"
+        v-else-if="todoStore.filteredTodos.length === 0"
         @create-todo="showCreateForm = true"
       />
 
@@ -34,13 +36,18 @@
       <div v-else class="px-4 sm:px-0">
         <div class="space-y-4">
           <TodoItem
-            v-for="todo in todoStore.todos"
+            v-for="todo in todoStore.filteredTodos"
             :key="todo.id"
             :todo="todo"
             @toggle="toggleTodo"
             @edit="editTodo"
             @delete="deleteTodo"
           />
+        </div>
+        
+        <!-- Show count of filtered vs total -->
+        <div v-if="todoStore.filteredTodos.length !== todoStore.todos.length" class="mt-4 text-center text-sm text-gray-500">
+          Showing {{ todoStore.filteredTodos.length }} of {{ todoStore.todos.length }} todos
         </div>
       </div>
     </main>
@@ -63,6 +70,7 @@ import { useTodoStore } from '@/stores/todoStore'
 
 // Components
 import TodoHeader from './TodoHeader.vue'
+import TodoFiltersComponent from './TodoFilters.vue'
 import TodoStats from './TodoStats.vue'
 import TodoItem from './TodoItem.vue'
 import TodoLoadingState from './TodoLoadingState.vue'
@@ -79,18 +87,29 @@ const showCreateForm = ref(false)
 const editingTodo = ref<Todo | null>(null)
 
 const filters = reactive<TodoFilters>({
+  status: undefined,
+  user_id: undefined,
   username: undefined
 })
 
 // Watch for filter changes
 watch(filters, (newFilters) => {
-  console.log('🎯 TodoList: Filters changed, triggering fetchTodos:', newFilters)
+  todoStore.updateFilters(newFilters)
   fetchTodos()
 }, { deep: true })
 
+// Also watch store filters to ensure UI updates
+watch(() => todoStore.filters, (newStoreFilters) => {
+  // Store filters updated
+}, { deep: true })
+
 const fetchTodos = async () => {
-  console.log('🎯 TodoList: fetchTodos called with filters:', filters)
   await todoStore.fetchTodos(filters)
+}
+
+const handleFiltersUpdate = (newFilters: TodoFilters) => {
+  Object.assign(filters, newFilters)
+  todoStore.updateFilters(newFilters)
 }
 
 const toggleTodo = async (id: number) => {

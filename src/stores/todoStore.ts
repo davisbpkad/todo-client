@@ -17,6 +17,8 @@ export const useTodoStore = defineStore('todo', {
     loading: false,
     error: null,
     filters: {
+      status: undefined,
+      user_id: undefined,
       username: undefined
     }
   }),
@@ -26,6 +28,42 @@ export const useTodoStore = defineStore('todo', {
     incompleteTodos: (state) => state.todos.filter(todo => !todo.is_completed),
     overdueTodos: (state) => state.todos.filter(todo => todo.is_overdue),
     todosCount: (state) => state.todos.length,
+    
+    // Filtered todos based on current filters
+    filteredTodos: (state) => {
+      let filtered = state.todos
+      
+      // Filter by status
+      if (state.filters.status) {
+        switch (state.filters.status) {
+          case 'completed':
+            filtered = filtered.filter(todo => todo.is_completed)
+            break
+          case 'incomplete':
+            filtered = filtered.filter(todo => !todo.is_completed)
+            break
+          case 'overdue':
+            filtered = filtered.filter(todo => todo.is_overdue)
+            break
+        }
+      }
+      
+      // Filter by user_id
+      if (state.filters.user_id) {
+        filtered = filtered.filter(todo => todo.user?.id === state.filters.user_id)
+      }
+      
+      // Filter by username
+      if (state.filters.username) {
+        const username = state.filters.username.toLowerCase()
+        filtered = filtered.filter(todo => 
+          todo.user?.name?.toLowerCase().includes(username) ||
+          todo.user?.email?.toLowerCase().includes(username)
+        )
+      }
+      
+      return filtered
+    },
     
     // Computed stats from local todos (real-time)
     computedStats: (state): TodoStats => ({
@@ -50,18 +88,11 @@ export const useTodoStore = defineStore('todo', {
       this.error = null
       
       try {
-        console.log('🏪 Store: fetchTodos called with filters:', filters)
-        console.log('🏪 Store: current store filters:', this.filters)
-        
-        // Use the passed filters, not the store filters
         const response = await todoService.getTodos(filters)
         this.todos = response.data
         
-        console.log('🏪 Store: fetched', response.data.length, 'todos')
-        
         return response
       } catch (error: any) {
-        console.error('🏪 Store: fetchTodos error:', error)
         this.error = error.message || 'Failed to fetch todos'
         throw error
       } finally {
@@ -181,6 +212,10 @@ export const useTodoStore = defineStore('todo', {
 
     setFilters(filters: TodoFilters) {
       this.filters = { ...this.filters, ...filters }
+    },
+
+    updateFilters(filters: TodoFilters) {
+      this.filters = { ...filters }
     },
 
     clearError() {
