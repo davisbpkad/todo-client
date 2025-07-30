@@ -31,6 +31,8 @@ export interface UpdateTodoData {
 }
 
 export interface TodoFilters {
+  username?: string
+  // Keep other fields for backward compatibility but mark as optional
   status?: 'completed' | 'incomplete' | 'overdue'
   user_id?: number
 }
@@ -58,15 +60,26 @@ export const todoService = {
   // Get all todos
   async getTodos(filters: TodoFilters = {}): Promise<{ data: Todo[], meta: any }> {
     try {
+      console.log('🔧 Service: getTodos called with filters:', filters)
+      
       const params = new URLSearchParams()
       Object.keys(filters).forEach(key => {
         const value = filters[key as keyof TodoFilters]
-        if (value) params.append(key, value.toString())
+        if (value) {
+          console.log(`🔧 Service: Adding param ${key} = ${value}`)
+          params.append(key, value.toString())
+        }
       })
       
-      const response = await api.get(`/todos?${params}`)
+      const queryString = params.toString()
+      console.log('🔧 Service: Final query string:', queryString)
+      
+      const response = await api.get(`/todos?${queryString}`)
+      console.log('🔧 Service: API response received:', response.data.data?.length || 0, 'todos')
+      
       return response.data
     } catch (error: any) {
+      console.error('🔧 Service: getTodos error:', error)
       throw error.response?.data || error.message
     }
   },
