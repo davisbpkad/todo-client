@@ -99,7 +99,7 @@ watch(filters, (newFilters) => {
 }, { deep: true })
 
 // Also watch store filters to ensure UI updates
-watch(() => todoStore.filters, (newStoreFilters) => {
+watch(() => todoStore.filters, () => {
   // Store filters updated
 }, { deep: true })
 
